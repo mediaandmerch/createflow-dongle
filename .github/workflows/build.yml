@@ -45,9 +45,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - name: Build
-        working-directory: apps/flasher
-        run: npx electron-vite build
+      - name: Build packages and app
+        run: npm run build
       - name: Package
         working-directory: apps/flasher
         env:
