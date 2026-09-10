@@ -4,10 +4,15 @@
   "private": true,
   "description": "Open firmware and flasher that turn an nRF52840 USB stick into the wireless dongle for the Naya Create keyboard",
   "license": "Apache-2.0",
-  "workspaces": ["packages/*", "apps/*"],
-  "engines": { "node": ">=20" },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "tsc -b packages/dfu packages/serial && npm run build -w @createflow-dongle/flasher",
     "test": "vitest run",
     "typecheck": "tsc -b packages/dfu packages/serial",
     "flash": "node tools/flash.mjs"

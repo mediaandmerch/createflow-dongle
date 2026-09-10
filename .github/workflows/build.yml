@@ -49,16 +49,27 @@ jobs:
         run: npm run build
       - name: Package
         working-directory: apps/flasher
+        shell: bash
         env:
           # macOS: Developer ID certificate (base64 .p12) and App Store Connect API key for
-          # notarization. Absent → unsigned build.
-          CSC_LINK: ${{ secrets.MAC_CERT_P12 }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_PATH }}
-          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERT_P12 != '' }}
-        run: npx electron-builder ${{ matrix.target }} --publish never
+          # notarization. electron-builder treats an empty CSC_LINK as a file path, so the
+          # variables are only exported when the secrets exist; otherwise the build is unsigned.
+          MAC_CERT_P12: ${{ secrets.MAC_CERT_P12 }}
+          MAC_CERT_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          MAC_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          MAC_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          MAC_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          if [ -n "$MAC_CERT_P12" ]; then
+            export CSC_LINK="$MAC_CERT_P12" CSC_KEY_PASSWORD="$MAC_CERT_PASSWORD"
+          else
+            export CSC_IDENTITY_AUTO_DISCOVERY=false
+          fi
+          if [ -n "$MAC_API_KEY" ]; then
+            echo "$MAC_API_KEY" > "$RUNNER_TEMP/AuthKey.p8"
+            export APPLE_API_KEY="$RUNNER_TEMP/AuthKey.p8" APPLE_API_KEY_ID="$MAC_API_KEY_ID" APPLE_API_ISSUER="$MAC_API_ISSUER"
+          fi
+          npx electron-builder ${{ matrix.target }} --publish never
       - name: Upload unsigned artifact
         id: upload
         uses: actions/upload-artifact@v4
