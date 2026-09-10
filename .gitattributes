@@ -1,0 +1,5 @@
+# Normalize line endings so Windows and Unix contributors get the same files
+* text=auto
+*.png binary
+*.zip binary
+*.icns binary
