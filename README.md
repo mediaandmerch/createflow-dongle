@@ -14,9 +14,9 @@ See [Known limits](#known-limits) for what hasn't been covered yet.
 
 ## What you need
 
-- An **EBYTE E104-BT5040U** — an nRF52840 USB stick that sells for around $10 on Amazon
-  or AliExpress. Nordic's own nRF52840 Dongle (PCA10059) works too, and so should any
-  nRF52840 stick that ships with Nordic's open DFU bootloader.
+- An **EBYTE E104-BT5040U** — an nRF52840 USB stick that sells for around $10 on Amazon.
+  Nordic's own nRF52840 Dongle (PCA10059) works too, and so should any nRF52840 stick
+  that ships with Nordic's open DFU bootloader.
 - A Naya Create with a spare Bluetooth slot.
 - The flasher app for your OS from [Releases](../../releases), or Node 20+ if you'd rather
   run it from source.
