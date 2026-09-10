@@ -37,6 +37,10 @@ export function App() {
   const [step, setStep] = useState<Step | null>(null);
   const [error, setError] = useState("");
   const [info, setInfo] = useState<{ version: string; firmwareVersion: string; firmwareBytes: number } | null>(null);
+  /* After a flash the stick reboots and is gone for ~15 s. Without this the status box
+   * would say "No stick found" right under "Done". Cleared when the stick reports back,
+   * or after 30 s in case it was unplugged. */
+  const [restarting, setRestarting] = useState(false);
 
   useEffect(() => {
     void window.flasher.getInfo().then(setInfo);
@@ -45,10 +49,20 @@ export function App() {
     return () => { offStatus(); offStep(); };
   }, []);
 
+  useEffect(() => {
+    if (status.kind !== "none") setRestarting(false);
+  }, [status]);
+
+  useEffect(() => {
+    if (!restarting) return;
+    const t = setTimeout(() => setRestarting(false), 30_000);
+    return () => clearTimeout(t);
+  }, [restarting]);
+
   async function flash() {
     setState("running"); setError(""); setStep(null);
     const r = await window.flasher.flash();
-    if (r.ok) setState("ok");
+    if (r.ok) { setState("ok"); setRestarting(true); }
     else { setError(r.error); setState("error"); }
   }
 
@@ -64,7 +78,8 @@ export function App() {
       <div className="status">
         <span className={"dot " + (status.kind === "bootloader" ? "ready" : status.kind === "bridge" ? "running" : "")} />
         <div className="text">
-          {status.kind === "none" && <>No stick found.<small>Plug in an EBYTE E104-BT5040U. Fresh out of the box, it's ready to flash.</small></>}
+          {status.kind === "none" && restarting && <>The stick is restarting…<small>It will be back as the dongle in a few seconds.</small></>}
+          {status.kind === "none" && !restarting && <>No stick found.<small>Plug in an EBYTE E104-BT5040U. Fresh out of the box, it's ready to flash.</small></>}
           {status.kind === "bootloader" && <>Stick is ready to flash.<small>{status.path}</small></>}
           {status.kind === "bridge" && <>Dongle firmware is running.<small>{status.path} — flashing replaces it with the version bundled in this app.</small></>}
         </div>

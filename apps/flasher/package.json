@@ -1,6 +1,6 @@
 {
   "name": "@createflow-dongle/flasher",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "createflow Dongle: one button to flash the dongle firmware onto an nRF52840 USB stick",
   "license": "Apache-2.0",

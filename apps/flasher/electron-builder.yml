@@ -42,6 +42,8 @@ win:
 nsis:
   oneClick: true
   perMachine: false
+# Swaps the AppImage runtime for one that doesn't need libfuse2 (see the script).
+afterAllArtifactBuild: scripts/appimage-runtime.cjs
 linux:
   # AppImage only; the deb target (fpm) produces an empty archive when built on macOS.
   target: [AppImage]

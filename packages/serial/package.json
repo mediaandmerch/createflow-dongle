@@ -1,6 +1,6 @@
 {
   "name": "@createflow-dongle/serial",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "serialport binding for the dongle: find it, send the 1200 baud touch, open the bootloader port",
   "license": "Apache-2.0",
