@@ -1,0 +1,50 @@
+appId: dev.createflow.dongle
+productName: createflow Dongle
+# The npm package name would otherwise become the install folder on Windows.
+extraMetadata:
+  name: createflow-dongle
+copyright: "Copyright © 2026 Sünkel Media & Merch\nFür Jesus. Für Menschen."
+artifactName: "createflow-dongle-${version}-${os}-${arch}.${ext}"
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+# The firmware package sits next to the app (process.resourcesPath/firmware), outside the
+# asar, so it can be swapped without rebuilding.
+extraResources:
+  - from: firmware
+    to: firmware
+# serialport ships prebuilt N-API binaries; no rebuild, and the .node files must stay
+# outside the asar.
+npmRebuild: false
+asarUnpack:
+  - "**/node_modules/@serialport/bindings-cpp/**"
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  category: public.app-category.utilities
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # Notarization uses APPLE_API_KEY / APPLE_API_KEY_ID / APPLE_API_ISSUER from the
+  # environment (see README); without them the app is signed only.
+  notarize: true
+dmg:
+  title: createflow Dongle
+win:
+  # No code-signing certificate yet: SmartScreen warns on first launch. Once a certificate
+  # exists, add win.certificateSubjectName or signtoolOptions here.
+  target: [nsis]
+nsis:
+  oneClick: true
+  perMachine: false
+linux:
+  # AppImage only; the deb target (fpm) produces an empty archive when built on macOS.
+  target: [AppImage]
+  executableName: createflow-dongle
+  category: Utility
+  maintainer: Sünkel Media & Merch

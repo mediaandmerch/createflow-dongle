@@ -1,0 +1,16 @@
+{
+  "name": "@createflow-dongle/serial",
+  "version": "0.1.0",
+  "private": true,
+  "description": "serialport binding for the dongle: find it, send the 1200 baud touch, open the bootloader port",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": { "build": "tsc -b" },
+  "dependencies": {
+    "@createflow-dongle/dfu": "*",
+    "serialport": "^13.0.0"
+  }
+}

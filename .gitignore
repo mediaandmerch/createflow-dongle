@@ -1,0 +1,13 @@
+node_modules/
+dist/
+out/
+release/
+build*/
+*.tsbuildinfo
+*.log
+.DS_Store
+# Firmware build artifacts and the throwaway DFU signing key live outside the repo
+firmware/dist/
+# The flasher app ships the current firmware package; everything else stays out
+*.zip
+!apps/flasher/firmware/*.zip

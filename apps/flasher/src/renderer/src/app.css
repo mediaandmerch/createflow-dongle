@@ -1,0 +1,26 @@
+/* Same palette as createflow so the apps look like one family. */
+:root{--bg:#1b1c20;--panel:#0f0f12;--line:#2a2a30;--ink:#f2f2f2;--muted:#8a8a93;
+  --accent:#aaa6ff;--accent-ink:#15142e;--ok:#2f8f5b;--ok-bg:#173225;--bad:#ff7a5c;--bad-bg:#3a2320;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;overflow:hidden;-webkit-user-select:none;user-select:none}
+main{display:flex;flex-direction:column;gap:1rem;padding:1.5rem 1.6rem;height:100vh}
+header h1{margin:0;font-size:1.35rem;font-weight:600;letter-spacing:.01em}
+header p{margin:.25rem 0 0;color:var(--muted)}
+.status{display:flex;align-items:center;gap:.7rem;padding:.9rem 1rem;border:1px solid var(--line);border-radius:.6rem;background:var(--panel)}
+.dot{width:.7rem;height:.7rem;border-radius:50%;background:var(--muted);flex:none}
+.dot.ready{background:var(--accent)}
+.dot.running{background:var(--ok)}
+.status .text{flex:1;line-height:1.35}
+.status .text small{display:block;color:var(--muted);font-family:var(--mono);font-size:.78rem;margin-top:.15rem}
+button.primary{appearance:none;border:0;border-radius:.6rem;padding:.9rem 1rem;font:inherit;font-size:1.05rem;font-weight:600;
+  background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.primary:disabled{background:var(--line);color:var(--muted);cursor:default}
+.progress{height:.55rem;border-radius:.3rem;background:var(--line);overflow:hidden}
+.progress div{height:100%;background:var(--accent);transition:width .15s linear}
+.step{color:var(--muted);min-height:1.3em}
+.result{padding:.8rem 1rem;border-radius:.6rem;line-height:1.4}
+.result.ok{background:var(--ok-bg);color:#d6f5e4}
+.result.bad{background:var(--bad-bg);color:#ffd9cf}
+.result b{display:block;margin-bottom:.2rem}
+footer{margin-top:auto;color:var(--muted);font-size:.78rem;font-family:var(--mono);display:flex;justify-content:space-between}

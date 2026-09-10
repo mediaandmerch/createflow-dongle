@@ -1,0 +1,22 @@
+/*
+ * USB HID device carrying the keyboard's own report map (see usb_hid.c).
+ * Report sizes include the leading report ID byte: input = 1 + 12 (consumer, the
+ * largest report), output = 1 + 1 (keyboard LEDs).
+ */
+/ {
+	hid_dev_0: hid_dev_0 {
+		compatible = "zephyr,hid-device";
+		label = "createflow-kbd";
+		protocol-code = "keyboard";
+		in-report-size = <13>;
+		in-polling-period-us = <1000>;
+		out-report-size = <2>;
+		out-polling-period-us = <1000>;
+	};
+};
+
+/* Log port. The default 1 KB TX FIFO overflows on the burst of messages emitted while
+ * connecting; anything that does not fit is dropped by the driver. */
+&board_cdc_acm_uart {
+	tx-fifo-size = <8192>;
+};
