@@ -1,0 +1,93 @@
+# Builds the flasher app for every platform and runs the tests. Release artifacts are
+# built here so they are verifiably produced from the source in this repository - a
+# requirement for code signing through SignPath Foundation.
+#
+# Signing steps are skipped while the corresponding secrets are missing, so the workflow
+# runs unchanged before and after certificates are set up.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  flasher:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win --x64
+            artifact: apps/flasher/release/*.exe
+          - os: macos-latest
+            target: --mac
+            artifact: apps/flasher/release/*.dmg
+          - os: ubuntu-latest
+            target: --linux --x64
+            artifact: apps/flasher/release/*.AppImage
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Build
+        working-directory: apps/flasher
+        run: npx electron-vite build
+      - name: Package
+        working-directory: apps/flasher
+        env:
+          # macOS: Developer ID certificate (base64 .p12) and App Store Connect API key for
+          # notarization. Absent → unsigned build.
+          CSC_LINK: ${{ secrets.MAC_CERT_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY_PATH }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.MAC_CERT_P12 != '' }}
+        run: npx electron-builder ${{ matrix.target }} --publish never
+      - name: Upload unsigned artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: flasher-${{ matrix.os }}
+          path: ${{ matrix.artifact }}
+          if-no-files-found: error
+
+      # Windows code signing through SignPath Foundation. Runs only once the SignPath
+      # project exists and the secret is set; see README "Code signing".
+      - name: Sign Windows installer (SignPath)
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/v') && env.SIGNPATH_API_TOKEN != ''
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: createflow-dongle
+          signing-policy-slug: release-signing
+          github-artifact-id: ${{ steps.upload.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: apps/flasher/release/signed
+      - name: Upload signed installer
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/v') && env.SIGNPATH_API_TOKEN != ''
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: flasher-windows-signed
+          path: apps/flasher/release/signed/*.exe

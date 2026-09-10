@@ -94,6 +94,27 @@ Naya Create ──Bluetooth HID──▶ dongle ──USB HID──▶ computer
   configuration channel over Bluetooth — see [findings](docs/findings.md).
 - The Linux build hasn't been tested on hardware.
 
+## Code signing
+
+Release builds are produced by [GitHub Actions](.github/workflows/build.yml) from the
+source in this repository, so every binary can be traced back to a commit.
+
+- **macOS:** signed with a Developer ID certificate and notarized by Apple.
+- **Windows:** free code signing provided by [SignPath.io](https://signpath.io), certificate
+  by [SignPath Foundation](https://signpath.org). *(Application pending — until it is
+  approved, Windows builds are unsigned and SmartScreen will warn once.)*
+
+**Code signing policy.** Authors of this project can modify the source code without review.
+Changes contributed by others are reviewed by a maintainer before they are merged. Every
+release is approved for signing by a maintainer (Sünkel Media & Merch) and built from a
+tagged commit by the workflow above; nothing that isn't in this repository ends up in a
+signed binary.
+
+**Privacy.** The flasher app does not collect, store or transmit any data. It talks to the
+USB stick over a serial port and to nothing else; it makes no network connections. The
+firmware on the dongle only ever communicates with the paired keyboard and the host it is
+plugged into.
+
 ## License
 
 Apache-2.0. Not affiliated with Naya B.V.
