@@ -50,16 +50,16 @@ const RESULT_TEXT: Record<number, string> = {
 /** Extended error codes (EXT_ERROR_CODE in pc-nrfutil), worded for the user. */
 const EXT_TEXT: Record<number, string> = {
   0x04: "init packet is invalid (wrong update type or missing fields)",
-  0x05: "firmware version is lower than the one on the stick - the bootloader does not allow a downgrade",
-  0x06: "hardware version does not match (package is not built for the nRF52840)",
+  0x05: "the firmware version is lower than what's on the stick — the bootloader doesn't allow downgrades",
+  0x06: "hardware version mismatch — this package wasn't built for the nRF52840",
   0x07: "SoftDevice version does not match",
-  0x08: "bootloader requires a signature, the package has none",
+  0x08: "the bootloader requires a signed package, but this one isn't signed",
   0x09: "hash type not supported",
   0x0a: "hash could not be calculated",
   0x0b: "signature type not supported",
-  0x0c: "firmware hash does not match the init packet",
+  0x0c: "the firmware hash doesn't match the init packet",
   0x0d: "not enough space on the stick",
-  0x0e: "this firmware is already on the stick",
+  0x0e: "this exact firmware is already on the stick",
 };
 
 export class DfuError extends Error {
@@ -186,7 +186,7 @@ async function ping(link: Link, timeoutMs: number): Promise<void> {
       if (!(e instanceof DfuError) || !/No response/.test(e.message)) throw e;
     }
   }
-  throw new DfuError("The bootloader is not responding. Is the stick plugged in, and is its LED pulsing red?");
+  throw new DfuError("The bootloader isn't responding. Is the stick plugged in, with its LED pulsing red?");
 }
 
 /**
@@ -219,7 +219,7 @@ async function sendObject(link: Link, type: number, data: Uint8Array, chunkSize:
     if (offset !== expectedOffset || crc !== runningCrc) {
       throw new DfuError(
         `Transfer corrupted: bootloader has ${offset} bytes (CRC ${crc.toString(16)}), ` +
-        `expected ${expectedOffset} (CRC ${runningCrc.toString(16)}). Unplug the stick, plug it back in and try again.`,
+        `expected ${expectedOffset} (CRC ${runningCrc.toString(16)}). Unplug the stick, plug it back in, and try again.`,
         OP.CALC_CRC);
     }
 

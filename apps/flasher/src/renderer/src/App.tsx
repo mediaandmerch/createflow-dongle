@@ -6,15 +6,15 @@ type State = "idle" | "running" | "ok" | "error";
 
 function stepText(s: Step): string {
   switch (s.kind) {
-    case "search": return "Looking for the stick …";
-    case "touch": return "Dongle is running - sending it to the bootloader …";
-    case "wait-bootloader": return `Waiting for the bootloader … ${s.secondsLeft} s`;
+    case "search": return "Looking for the stick…";
+    case "touch": return "Dongle is running — sending it back to the bootloader…";
+    case "wait-bootloader": return `Waiting for the bootloader… ${s.secondsLeft}s`;
     case "flash": {
       const p = s.progress;
-      if (p.phase === "connecting") return "Bootloader is responding …";
-      if (p.phase === "init") return "Init packet …";
-      if (p.phase === "firmware") return `Firmware ${Math.round((100 * p.sent) / p.total)} %`;
-      return "Transferred, stick is restarting …";
+      if (p.phase === "connecting") return "Talking to the bootloader…";
+      if (p.phase === "init") return "Sending init packet…";
+      if (p.phase === "firmware") return `Sending firmware… ${Math.round((100 * p.sent) / p.total)}%`;
+      return "Transfer complete, the stick is restarting…";
     }
     case "done": return "Done.";
   }
@@ -58,38 +58,38 @@ export function App() {
     <main>
       <header>
         <h1>createflow Dongle</h1>
-        <p>Turns an nRF52840 USB stick into the wireless dongle for the Naya Create.</p>
+        <p>Turns an nRF52840 USB stick into a wireless dongle for the Naya Create.</p>
       </header>
 
       <div className="status">
         <span className={"dot " + (status.kind === "bootloader" ? "ready" : status.kind === "bridge" ? "running" : "")} />
         <div className="text">
-          {status.kind === "none" && <>No stick found.<small>Plug in an EBYTE E104-BT5040U - out of the box it is ready right away.</small></>}
-          {status.kind === "bootloader" && <>Stick ready to flash.<small>{status.path}</small></>}
-          {status.kind === "bridge" && <>Dongle firmware is running.<small>{status.path} - flashing replaces it with the bundled version.</small></>}
+          {status.kind === "none" && <>No stick found.<small>Plug in an EBYTE E104-BT5040U. Fresh out of the box, it's ready to flash.</small></>}
+          {status.kind === "bootloader" && <>Stick is ready to flash.<small>{status.path}</small></>}
+          {status.kind === "bridge" && <>Dongle firmware is running.<small>{status.path} — flashing replaces it with the version bundled in this app.</small></>}
         </div>
       </div>
 
       <button className="primary" disabled={!canFlash} onClick={() => void flash()}>
-        {state === "running" ? "Working …" : status.kind === "bridge" ? "Update firmware" : "Flash firmware"}
+        {state === "running" ? "Working…" : status.kind === "bridge" ? "Update firmware" : "Flash firmware"}
       </button>
 
       {(state === "running" || state === "ok") && (
         <>
           <div className="progress"><div style={{ width: `${percent(step)}%` }} /></div>
-          <div className="step">{step ? stepText(step) : "Starting …"}</div>
+          <div className="step">{step ? stepText(step) : "Starting…"}</div>
         </>
       )}
 
       {state === "ok" && (
         <div className="result ok">
-          <b>Done - the dongle is ready.</b>
-          Pair the Naya: hold the layer key (bottom left) and press <b style={{ display: "inline" }}>4</b>. From then on the Naya types through the dongle.
+          <b>Done — the dongle is ready.</b>
+          Now pair the keyboard: hold the Naya's layer key (bottom-left) and press <b style={{ display: "inline" }}>1</b>, <b style={{ display: "inline" }}>2</b>, <b style={{ display: "inline" }}>3</b> or <b style={{ display: "inline" }}>4</b> to switch to a Bluetooth slot that isn't paired with another computer. The dongle picks it up from there.
         </div>
       )}
       {state === "error" && (
         <div className="result bad">
-          <b>That did not work.</b>
+          <b>That didn't work.</b>
           {error}
         </div>
       )}

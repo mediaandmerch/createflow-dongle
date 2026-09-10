@@ -36,7 +36,7 @@ export interface FlowOptions {
 
 export class NoStickError extends Error {
   constructor() {
-    super("No stick found. Please plug in the nRF52840 stick (EBYTE E104-BT5040U).");
+    super("No stick found. Plug in the nRF52840 stick (EBYTE E104-BT5040U) and try again.");
     this.name = "NoStickError";
   }
 }
@@ -72,8 +72,8 @@ export async function flashStick(devices: Devices, pkg: DfuPackage, opts: FlowOp
       (secondsLeft) => onStep({ kind: "wait-bootloader", secondsLeft })) ?? undefined;
     if (!target) {
       throw new DfuError(
-        "The stick did not show up in the bootloader after the 1200 baud touch. " +
-        "Unplug it, hold the reset button, plug it in (LED pulses red) and try again.");
+        "The stick didn't come back in bootloader mode after the 1200-baud touch. " +
+        "Unplug it, hold its reset button while plugging it back in (the LED should pulse red), then try again.");
     }
     /* macOS needs a moment after the port appears before it can be opened. */
     await sleep(1500);
