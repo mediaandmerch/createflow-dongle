@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { readDfuPackage, flashStick, type Step } from "@createflow-dongle/dfu";
@@ -61,6 +61,8 @@ ipcMain.handle("flash", async (): Promise<FlashResult> => {
 });
 
 void app.whenReady().then(() => {
+  /* One window, one button - Electron's default File/Edit/View menu bar has nothing to offer. */
+  if (process.platform !== "darwin") Menu.setApplicationMenu(null);
   app.setAboutPanelOptions({
     applicationName: "createflow Dongle",
     applicationVersion: app.getVersion(),

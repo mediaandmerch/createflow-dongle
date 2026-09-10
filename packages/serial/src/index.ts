@@ -30,7 +30,12 @@ function openPort(path: string, baudRate: number): Promise<SerialPort> {
     const port = new SerialPort({ path, baudRate, dataBits: 8, parity: "none", stopBits: 1, rtscts: false, autoOpen: false });
     port.open((err) => {
       if (!err) return resolve(port);
-      const hint = /lock|busy|unavailable|access/i.test(err.message) ? " Is another program using the port?" : "";
+      let hint = "";
+      if (/permission denied|EACCES/i.test(err.message) && process.platform === "linux") {
+        hint = " On Linux your user needs access to serial ports: run `sudo usermod -aG dialout $USER`, then log out and back in.";
+      } else if (/lock|busy|unavailable|access/i.test(err.message)) {
+        hint = " Is another program using the port?";
+      }
       reject(new Error(`Cannot open ${path}: ${err.message}.${hint}`));
     });
   });
@@ -47,10 +52,14 @@ export async function touch1200(path: string): Promise<void> {
   await new Promise<void>((r) => port.close(() => r()));
 }
 
-/** Open the bootloader's port as a Transport (115200 8N1, DTR/RTS asserted). */
+/** Open the bootloader's port as a Transport (115200 8N1). */
 export async function openTransport(path: string): Promise<Transport> {
   const port = await openPort(path, 115200);
-  await new Promise<void>((resolve, reject) => port.set({ dtr: true, rts: true }, (e) => (e ? reject(e) : resolve())));
+  /* Assert DTR/RTS for hosts that only start talking once they are set (Windows). Linux
+   * answers "Operation not supported" for the bootloader's minimal CDC device; the
+   * transfer works without the lines there, so only that error is tolerated. */
+  await new Promise<void>((resolve, reject) => port.set({ dtr: true, rts: true }, (e) =>
+    (!e || /not supported/i.test(e.message)) ? resolve() : reject(e)));
 
   const listeners = new Set<(c: Uint8Array) => void>();
   port.on("data", (buf: Buffer) => {

@@ -9,8 +9,9 @@ fills the gap: the stick pairs with the keyboard over Bluetooth, just like a lap
 and shows up on your computer as an ordinary USB keyboard, media controller and mouse. It
 uses nothing but standard Bluetooth HID, which the Naya already speaks.
 
-**Status:** keys, touchpad, dials and media keys all work. Tested on macOS and Windows.
-See [Known limits](#known-limits) for what hasn't been covered yet.
+**Status:** keys, touchpad, dials and media keys all work. Flashing is tested on macOS,
+Windows and Linux (Ubuntu 24.04). See [Known limits](#known-limits) for what hasn't been
+covered yet.
 
 ## What you need
 
@@ -35,7 +36,9 @@ button.
 **Windows:** the installer isn't code-signed yet, so SmartScreen will say "Windows
 protected your PC". Click *More info*, then *Run anyway*.
 **Linux:** your user needs permission to open serial ports — usually the `dialout` or
-`uucp` group, depending on your distribution.
+`uucp` group, depending on your distribution (`sudo usermod -aG dialout $USER`, then log
+out and back in). The app tells you if that's missing. The AppImage needs no
+installation; make it executable and run it.
 
 ## Pairing the keyboard
 
@@ -92,7 +95,8 @@ Naya Create ──Bluetooth HID──▶ dongle ──USB HID──▶ computer
   triggers DFU).
 - Configuring the keyboard itself (layouts, modules) still requires USB. The Naya has no
   configuration channel over Bluetooth — see [findings](docs/findings.md).
-- The Linux build hasn't been tested on hardware.
+- Linux was tested on Ubuntu 24.04 only. Other distributions should work but haven't
+  been tried.
 
 ## Code signing
 
