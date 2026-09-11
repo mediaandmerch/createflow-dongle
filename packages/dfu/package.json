@@ -1,6 +1,6 @@
 {
   "name": "@createflow-dongle/dfu",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Nordic's serial DFU protocol (SLIP over USB CDC) in TypeScript, for the open nRF52840 bootloader",
   "license": "Apache-2.0",

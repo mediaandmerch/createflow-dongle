@@ -1,6 +1,6 @@
 {
   "name": "createflow-dongle",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Open firmware and flasher that turn an nRF52840 USB stick into the wireless dongle for the Naya Create keyboard",
   "license": "Apache-2.0",
