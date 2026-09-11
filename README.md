@@ -89,8 +89,6 @@ Naya Create ──Bluetooth HID──▶ dongle ──USB HID──▶ computer
   or a future Naya firmware with a different descriptor, won't work out of the box. The
   dongle logs the mismatch together with the keyboard's descriptor, so it can be pasted
   into `usb_hid.c`.
-- Lock-key LEDs (caps lock and friends) aren't passed back to the keyboard. The Naya
-  Create has no such LEDs, so this only matters with a different keyboard.
 - Long-term stability and host sleep/wake haven't been characterised yet. The dongle
   prints counters to its serial port every 30 seconds (115200 baud — never 1200, that
   triggers DFU).
