@@ -43,10 +43,12 @@ export function App() {
   const [restarting, setRestarting] = useState(false);
   /** A newer release on GitHub, found by the main process at start. */
   const [update, setUpdate] = useState<UpdateInfo | null>(null);
+  const [updateCheck, setUpdateCheck] = useState(true);
 
   useEffect(() => {
     void window.flasher.getInfo().then(setInfo);
     void window.flasher.getUpdate().then(setUpdate);
+    void window.flasher.getUpdateCheck().then(setUpdateCheck);
     const offStatus = window.flasher.onStatus(setStatus);
     const offStep = window.flasher.onStep(setStep);
     const offUpdate = window.flasher.onUpdate(setUpdate);
@@ -119,6 +121,11 @@ export function App() {
           {error}
         </div>
       )}
+
+      <label className="check" title="Once per start the app asks GitHub for the newest release. Off: the app makes no network connection at all.">
+        <input type="checkbox" checked={updateCheck} onChange={(e) => void window.flasher.setUpdateCheck(e.target.checked).then(setUpdateCheck)} />
+        Check GitHub for new versions
+      </label>
 
       <footer>
         <span>createflow Dongle {info?.version ?? ""}</span>

@@ -20,4 +20,7 @@ export interface FlasherApi {
   onUpdate(cb: (u: UpdateInfo | null) => void): () => void;
   /** Opens the release page of the newer version in the browser. */
   openUpdate(): Promise<void>;
+  /** Whether the app may ask GitHub for new releases (on by default). */
+  getUpdateCheck(): Promise<boolean>;
+  setUpdateCheck(on: boolean): Promise<boolean>;
 }

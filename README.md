@@ -124,7 +124,8 @@ signed binary.
 **Privacy.** The flasher app does not collect, store or transmit any data about you. It talks
 to the USB stick over a serial port. Its only network request: once per start it asks GitHub
 (`api.github.com`) for the newest release, to show a notice when there is a newer version
-(GitHub sees the usual IP address, nothing else is sent). The
+(GitHub sees the usual IP address, nothing else is sent). Untick *Check GitHub for new
+versions* at the bottom of the window and it makes no network connection at all. The
 firmware on the dongle only ever communicates with the paired keyboard and the host it is
 plugged into.
 

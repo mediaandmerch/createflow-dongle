@@ -25,4 +25,6 @@ button.primary:disabled{background:var(--line);color:var(--muted);cursor:default
 .result b{display:block;margin-bottom:.2rem}
 .update{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.6rem .8rem .6rem 1rem;border:1px solid var(--accent);border-radius:.6rem;color:var(--accent)}
 .update button{appearance:none;border:0;border-radius:.4rem;padding:.4rem .75rem;font:inherit;font-weight:600;background:var(--accent);color:var(--accent-ink);cursor:pointer;white-space:nowrap}
-footer{margin-top:auto;color:var(--muted);font-size:.78rem;font-family:var(--mono);display:flex;justify-content:space-between}
+.check{margin-top:auto;display:flex;align-items:center;gap:.45rem;color:var(--muted);font-size:.82rem;cursor:pointer}
+.check input{accent-color:var(--accent);margin:0}
+footer{color:var(--muted);font-size:.78rem;font-family:var(--mono);display:flex;justify-content:space-between}

@@ -16,5 +16,7 @@ const api: FlasherApi = {
   getUpdate: () => ipcRenderer.invoke("getUpdate"),
   onUpdate: (cb) => on<UpdateInfo | null>("update", cb),
   openUpdate: () => ipcRenderer.invoke("openUpdate"),
+  getUpdateCheck: () => ipcRenderer.invoke("getUpdateCheck"),
+  setUpdateCheck: (on) => ipcRenderer.invoke("setUpdateCheck", on),
 };
 contextBridge.exposeInMainWorld("flasher", api);

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, Menu, net, shell } from "electron";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { readDfuPackage, flashStick, type Step } from "@createflow-dongle/dfu";
 import { findDonglePorts, serialDevices } from "@createflow-dongle/serial";
@@ -11,7 +11,8 @@ let win: BrowserWindow | null = null;
 const LATEST_RELEASE_URL = "https://api.github.com/repos/mediaandmerch/createflow-dongle/releases/latest";
 let update: UpdateInfo | null = null;
 /** The app's only network request: the newest release on GitHub, once per start, so people
- *  learn about fixed firmware. Offline or an error status just leave the notice away. */
+ *  learn about fixed firmware; switched off in the window, it isn't made at all. Offline or an
+ *  error status just leave the notice away. */
 async function checkForUpdate(): Promise<void> {
   try {
     const res = await net.fetch(LATEST_RELEASE_URL, { headers: { accept: "application/vnd.github+json" } });
@@ -23,6 +24,20 @@ async function checkForUpdate(): Promise<void> {
     console.log(`[update] ${(e as Error).message}`);
   }
 }
+/** The flasher's only setting: whether it may ask GitHub at all. On unless switched off; the
+ *  file is missing until then. Broken JSON should surface, not silently switch it on. */
+const settingsFile = () => join(app.getPath("userData"), "settings.json");
+function updateCheckOn(): boolean {
+  if (!existsSync(settingsFile())) return true;
+  return (JSON.parse(readFileSync(settingsFile(), "utf8")) as { updateCheck?: boolean }).updateCheck !== false;
+}
+ipcMain.handle("getUpdateCheck", () => updateCheckOn());
+ipcMain.handle("setUpdateCheck", (_e, on: boolean) => {
+  writeFileSync(settingsFile(), JSON.stringify({ updateCheck: on }));
+  if (on) void checkForUpdate();
+  else { update = null; win?.webContents.send("update", null); }
+  return on;
+});
 ipcMain.handle("getUpdate", () => update);
 // parseLatestRelease only lets github.com links through
 ipcMain.handle("openUpdate", () => (update ? shell.openExternal(update.url) : undefined));
@@ -95,7 +110,7 @@ void app.whenReady().then(() => {
   }
   win = createWindow();
   setInterval(() => void reportStatus(), 1000);
-  void checkForUpdate();
+  if (updateCheckOn()) void checkForUpdate();
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) win = createWindow(); });
 });
 app.on("window-all-closed", () => app.quit());
