@@ -51,6 +51,13 @@ Bluetooth later.
 Keep the keyboard unplugged from USB while pairing — when it's on a cable, it sends
 keystrokes over the cable instead.
 
+**If the dongle stops typing.** When the keyboard no longer has the key for the dongle (its
+slot was cleared or paired again), firmware up to 0.1.2 kept retrying the old key and never
+paired again. Since 0.1.3 the dongle forgets that key by itself and pairs anew within a few
+seconds; update the firmware with the flasher app if yours is older. The dongle's serial port
+is its log: open it at 115200 baud (never 1200 — that restarts it into the bootloader) to see
+lines like `forgot the stale bond …` and `keyboard connected, forwarding reports`.
+
 ## Building from source
 
 ```
@@ -114,8 +121,10 @@ release is approved for signing by a maintainer (Sünkel Media & Merch) and buil
 tagged commit by the workflow above; nothing that isn't in this repository ends up in a
 signed binary.
 
-**Privacy.** The flasher app does not collect, store or transmit any data. It talks to the
-USB stick over a serial port and to nothing else; it makes no network connections. The
+**Privacy.** The flasher app does not collect, store or transmit any data about you. It talks
+to the USB stick over a serial port. Its only network request: once per start it asks GitHub
+(`api.github.com`) for the newest release, to show a notice when there is a newer version
+(GitHub sees the usual IP address, nothing else is sent). The
 firmware on the dongle only ever communicates with the paired keyboard and the host it is
 plugged into.
 

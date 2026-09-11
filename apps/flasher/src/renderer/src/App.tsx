@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Step } from "@createflow-dongle/dfu";
-import type { StickStatus } from "../../shared/ipc.js";
+import type { StickStatus, UpdateInfo } from "../../shared/ipc.js";
 
 type State = "idle" | "running" | "ok" | "error";
 
@@ -41,12 +41,16 @@ export function App() {
    * would say "No stick found" right under "Done". Cleared when the stick reports back,
    * or after 30 s in case it was unplugged. */
   const [restarting, setRestarting] = useState(false);
+  /** A newer release on GitHub, found by the main process at start. */
+  const [update, setUpdate] = useState<UpdateInfo | null>(null);
 
   useEffect(() => {
     void window.flasher.getInfo().then(setInfo);
+    void window.flasher.getUpdate().then(setUpdate);
     const offStatus = window.flasher.onStatus(setStatus);
     const offStep = window.flasher.onStep(setStep);
-    return () => { offStatus(); offStep(); };
+    const offUpdate = window.flasher.onUpdate(setUpdate);
+    return () => { offStatus(); offStep(); offUpdate(); };
   }, []);
 
   useEffect(() => {
@@ -74,6 +78,13 @@ export function App() {
         <h1>createflow Dongle</h1>
         <p>Turns an nRF52840 USB stick into a wireless dongle for the Naya Create.</p>
       </header>
+
+      {update && (
+        <div className="update">
+          <span>Version {update.version} is available.</span>
+          <button onClick={() => void window.flasher.openUpdate()}>Open download page</button>
+        </div>
+      )}
 
       <div className="status">
         <span className={"dot " + (status.kind === "bootloader" ? "ready" : status.kind === "bridge" ? "running" : "")} />

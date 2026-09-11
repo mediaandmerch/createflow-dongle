@@ -21,6 +21,7 @@
 #include <bluetooth/services/hogp.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/logging/log.h>
+#include <app_version.h>
 
 LOG_MODULE_REGISTER(bridge, LOG_LEVEL_INF);
 
@@ -235,6 +236,32 @@ static const struct bt_gatt_dm_cb dm_cb = {
 	.error_found = dm_error,
 };
 
+/* --- Stale bonds --- */
+
+/* A keyboard that no longer has the key for this dongle (its slot was cleared or paired again
+ * elsewhere) answers the stored key with "PIN or key missing". The dongle then kept retrying
+ * that key and never paired again (seen 2026-09-11). Forget the key instead; the next
+ * connection pairs from scratch. Only a bonded peer can answer this way, so a stranger nearby
+ * can't make the dongle drop its keyboard. bt_unpair() also ends the connection. */
+static bt_addr_le_t stale_peer;
+
+static void forget_stale_peer(struct k_work *work)
+{
+	ARG_UNUSED(work);
+	char addr[BT_ADDR_LE_STR_LEN];
+
+	bt_addr_le_to_str(&stale_peer, addr, sizeof(addr));
+	int err = bt_unpair(BT_ID_DEFAULT, &stale_peer);
+
+	if (err) {
+		LOG_ERR("forgetting the bond with %s failed: %d", addr, err);
+		return;
+	}
+	LOG_INF("forgot the stale bond with %s, pairing again on the next connection", addr);
+}
+
+static K_WORK_DEFINE(forget_work, forget_stale_peer);
+
 /* --- Connection --- */
 
 static void connected(struct bt_conn *conn, uint8_t err)
@@ -256,6 +283,10 @@ static void security_changed(struct bt_conn *conn, bt_security_t level,
 {
 	if (err) {
 		LOG_WRN("pairing/encryption failed: %d", err);
+		if (err == BT_SECURITY_ERR_PIN_OR_KEY_MISSING) {
+			bt_addr_le_copy(&stale_peer, bt_conn_get_dst(conn));
+			k_work_submit(&forget_work);
+		}
 		return;
 	}
 	LOG_INF("encrypted (level %d), discovering HID service", level);
@@ -317,7 +348,7 @@ static int scan_setup(void)
 
 int main(void)
 {
-	LOG_INF("createflow dongle starting");
+	LOG_INF("createflow dongle %s starting", APP_VERSION_STRING);
 	led_on(&led_run);
 
 	/* First and independent of everything else: if anything below fails, the 1200 baud

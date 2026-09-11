@@ -11,3 +11,6 @@ firmware/dist/
 # The flasher app ships the current firmware package; everything else stays out
 *.zip
 !apps/flasher/firmware/*.zip
+
+# Editor index (clangd)
+.cache/

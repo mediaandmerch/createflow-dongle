@@ -1,11 +1,31 @@
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, net, shell } from "electron";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { readDfuPackage, flashStick, type Step } from "@createflow-dongle/dfu";
 import { findDonglePorts, serialDevices } from "@createflow-dongle/serial";
-import type { FlashResult, StickStatus } from "../shared/ipc.js";
+import type { FlashResult, StickStatus, UpdateInfo } from "../shared/ipc.js";
+import { isNewer, parseLatestRelease } from "../shared/update.js";
 
 let win: BrowserWindow | null = null;
+
+const LATEST_RELEASE_URL = "https://api.github.com/repos/mediaandmerch/createflow-dongle/releases/latest";
+let update: UpdateInfo | null = null;
+/** The app's only network request: the newest release on GitHub, once per start, so people
+ *  learn about fixed firmware. Offline or an error status just leave the notice away. */
+async function checkForUpdate(): Promise<void> {
+  try {
+    const res = await net.fetch(LATEST_RELEASE_URL, { headers: { accept: "application/vnd.github+json" } });
+    if (!res.ok) { console.log(`[update] GitHub answered ${res.status}`); return; }
+    const latest = parseLatestRelease(await res.json());
+    update = latest && isNewer(latest.version, app.getVersion()) ? latest : null;
+    win?.webContents.send("update", update);
+  } catch (e) {
+    console.log(`[update] ${(e as Error).message}`);
+  }
+}
+ipcMain.handle("getUpdate", () => update);
+// parseLatestRelease only lets github.com links through
+ipcMain.handle("openUpdate", () => (update ? shell.openExternal(update.url) : undefined));
 
 /* The firmware package ships next to the app (extraResources), in development it sits in
  * the project folder. firmware.json names the file and its version. */
@@ -75,6 +95,7 @@ void app.whenReady().then(() => {
   }
   win = createWindow();
   setInterval(() => void reportStatus(), 1000);
+  void checkForUpdate();
   app.on("activate", () => { if (BrowserWindow.getAllWindows().length === 0) win = createWindow(); });
 });
 app.on("window-all-closed", () => app.quit());
