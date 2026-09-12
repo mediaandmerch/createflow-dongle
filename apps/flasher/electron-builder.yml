@@ -36,9 +36,21 @@ mac:
 dmg:
   title: createflow Dongle
 win:
-  # No code-signing certificate yet: SmartScreen warns on first launch. Once a certificate
-  # exists, add win.certificateSubjectName or signtoolOptions here.
+  # nsis is the direct download and stays unsigned, so SmartScreen warns on first launch.
+  # The Store package (appx) is what gets rid of that warning — the Store signs it after
+  # certification, so we need no certificate of our own. It is a separate target because
+  # makeappx comes from the Windows SDK and the build fails outside Windows; putting it here
+  # would break dist:win on macOS. Build it on Windows with `npm run dist:win:store`.
   target: [nsis]
+# Store identity, taken from Partner Center (Product identity, store ID 9P014D85B5KV). These
+# three values must match exactly or the upload is rejected.
+appx:
+  identityName: SnkelMediaMerch.createflowDongle
+  publisher: CN=F7DDEDEE-661F-4750-8883-4E734CD5623C
+  publisherDisplayName: Sünkel Media & Merch
+  applicationId: createflowDongle
+  displayName: createflow Dongle
+  languages: [de-DE, en-US]
 nsis:
   oneClick: true
   perMachine: false
