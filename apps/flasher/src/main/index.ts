@@ -25,11 +25,15 @@ async function checkForUpdate(): Promise<void> {
   }
 }
 /** The flasher's only setting: whether it may ask GitHub at all. On unless switched off; the
- *  file is missing until then. Broken JSON should surface, not silently switch it on. */
+ *  file is missing until then. Broken JSON should surface, not silently switch it on.
+ *  The Store build inverts the default: Windows updates the app there, and a notice pointing
+ *  at an unsigned download would breach store policy. Switching it on stays possible. */
 const settingsFile = () => join(app.getPath("userData"), "settings.json");
+const storeBuild = process.windowsStore === true;
 function updateCheckOn(): boolean {
-  if (!existsSync(settingsFile())) return true;
-  return (JSON.parse(readFileSync(settingsFile(), "utf8")) as { updateCheck?: boolean }).updateCheck !== false;
+  if (!existsSync(settingsFile())) return !storeBuild;
+  const chosen = (JSON.parse(readFileSync(settingsFile(), "utf8")) as { updateCheck?: boolean }).updateCheck;
+  return storeBuild ? chosen === true : chosen !== false;
 }
 ipcMain.handle("getUpdateCheck", () => updateCheckOn());
 ipcMain.handle("setUpdateCheck", (_e, on: boolean) => {

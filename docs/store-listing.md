@@ -136,13 +136,22 @@ app: no violence, no sexual content, no gambling, no user-generated content, no 
 adverts, no purchases. It shares no personal data and has no unmoderated communication. The
 expected outcome is the lowest rating.
 
+## Privacy policy
+
+`PRIVACY.md` in the repository root, German and English. Once pushed, the URL for Partner
+Center is:
+
+> https://github.com/mediaandmerch/createflow-dongle/blob/main/PRIVACY.md
+
+It names the one network call the app makes (api.github.com for the version check, off by
+default in the Store build) rather than claiming the app never touches the network — that
+claim would be false while the check is on, and a privacy policy that overstates is worse than
+none.
+
 ## Still needed before submission
 
-1. **Screenshot.** At least one is mandatory, PNG, minimum 1366 × 768. Must be taken on
-   Windows with the app running — the flasher window with a stick plugged in is the obvious
-   shot.
-2. **Privacy policy URL.** Mandatory once an app declares any capability. The text can be
-   short and truthful: the app collects nothing. Needs a stable public URL.
-3. **A decision on the update check.** The app offers "Check GitHub for new versions". In the
-   Store build that should default to off — the Store handles updates, and a notice leading to
-   an unsigned download would run into store policy.
+1. **Screenshot.** At least one is mandatory, PNG, minimum 1366 × 768, and it has to be taken
+   on Windows with the app running — a macOS window in a Windows Store listing would be both
+   obvious to the reviewer and misleading to buyers. This needs a logged-in Windows session,
+   which SSH alone cannot provide.
+2. **Push.** The privacy policy URL only resolves once the repository is pushed.
