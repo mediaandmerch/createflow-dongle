@@ -47,7 +47,11 @@ win:
 appx:
   identityName: SnkelMediaMerch.createflowDongle
   publisher: CN=F7DDEDEE-661F-4750-8883-4E734CD5623C
-  publisherDisplayName: Sünkel Media & Merch
+  # The ampersand must be written as an XML entity: electron-builder drops this value into
+  # AppxManifest.xml verbatim, and a bare & makes the manifest invalid — makeappx then fails
+  # with 0x80080204. XML parsing turns it back into "Sünkel Media & Merch", which is what the
+  # Store expects.
+  publisherDisplayName: Sünkel Media &amp; Merch
   applicationId: createflowDongle
   displayName: createflow Dongle
   languages: [de-DE, en-US]
