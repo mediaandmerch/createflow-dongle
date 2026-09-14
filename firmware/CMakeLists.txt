@@ -5,6 +5,7 @@ project(createflow_dongle)
 
 target_sources(app PRIVATE
   src/main.c
+  src/battery.c
   src/usb_hid.c
   src/dfu_trigger.c
 )

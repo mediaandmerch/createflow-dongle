@@ -7,6 +7,7 @@
  * on USB, so nothing needs translating.
  */
 #include "bridge.h"
+#include "battery.h"
 
 #include <string.h>
 
@@ -67,6 +68,27 @@ static void log_stats(struct k_work *work)
 			stats.connections, stats.disconnects);
 	}
 	k_work_schedule(&stats_work, K_SECONDS(30));
+}
+
+/* --- Status line for the host ---
+ * createflow reads the dongle's USB serial port and looks for this line: whether the keyboard is
+ * connected over the air, and its battery charge (-1 while unknown). Printed on every change and
+ * every 10 s, so a listener that opens the port late still learns the state within seconds. */
+static bool link_up;
+
+static void emit_status(void)
+{
+	LOG_INF("@CFSTATUS v=1 link=%s batt=%d", link_up ? "up" : "down", battery_level());
+}
+
+static void status_tick(struct k_work *work);
+static K_WORK_DELAYABLE_DEFINE(status_work, status_tick);
+
+static void status_tick(struct k_work *work)
+{
+	ARG_UNUSED(work);
+	emit_status();
+	k_work_schedule(&status_work, K_SECONDS(10));
 }
 
 /* --- Input reports --- */
@@ -189,6 +211,8 @@ static void hogp_ready(struct bt_hogp *hp)
 		return;
 	}
 	LOG_INF("keyboard connected, forwarding reports");
+	link_up = true;
+	emit_status();
 
 	report_map_len = 0;
 	k_work_submit(&report_map_work);
@@ -211,11 +235,14 @@ static const struct bt_hogp_init_params hogp_init = {
 static void dm_completed(struct bt_gatt_dm *dm, void *ctx)
 {
 	ARG_UNUSED(ctx);
+	struct bt_conn *conn = bt_gatt_dm_conn_get(dm);
 	int err = bt_hogp_handles_assign(dm, &hogp);
 	if (err) {
 		LOG_ERR("HOGP handle assignment failed: %d", err);
 	}
 	bt_gatt_dm_data_release(dm);
+	/* HID first, then the battery service: one discovery runs at a time. */
+	battery_discover(conn);
 }
 
 static void dm_service_not_found(struct bt_conn *conn, void *ctx)
@@ -300,6 +327,9 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
 	ARG_UNUSED(conn);
 	stats.disconnects++;
+	link_up = false;
+	battery_reset();
+	emit_status();
 	LOG_INF("disconnected (0x%02x), scanning again", reason);
 	if (bt_hogp_assign_check(&hogp)) {
 		bt_hogp_release(&hogp);
@@ -383,5 +413,7 @@ int main(void)
 	}
 	LOG_INF("scanning for the keyboard");
 	k_work_schedule(&stats_work, K_SECONDS(30));
+	battery_on_change(emit_status);
+	k_work_schedule(&status_work, K_SECONDS(10));
 	return 0;
 }
