@@ -78,7 +78,18 @@ static bool link_up;
 
 static void emit_status(void)
 {
-	LOG_INF("@CFSTATUS v=1 link=%s batt=%d", link_up ? "up" : "down", battery_level());
+	/* The dongle's own address: the keyboard keeps it in the dongle's slot, so createflow can tell
+	 * which slot is in use without a cable. bt_addr_le_to_str appends " (random)"; cut to 17. */
+	bt_addr_le_t ids[CONFIG_BT_ID_MAX];
+	size_t n = ARRAY_SIZE(ids);
+	char addr[BT_ADDR_LE_STR_LEN] = "-";
+
+	bt_id_get(ids, &n);
+	if (n > 0) {
+		bt_addr_le_to_str(&ids[0], addr, sizeof(addr));
+		addr[17] = '\0';
+	}
+	LOG_INF("@CFSTATUS v=1 link=%s batt=%d addr=%s", link_up ? "up" : "down", battery_level(), addr);
 }
 
 static void status_tick(struct k_work *work);
