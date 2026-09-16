@@ -3,6 +3,8 @@ dist/
 out/
 release/
 build*/
+# ...except the app's build resources (icon, entitlements, Store tiles)
+!apps/flasher/build/
 *.tsbuildinfo
 *.log
 .DS_Store

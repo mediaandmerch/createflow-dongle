@@ -55,6 +55,10 @@ appx:
   applicationId: createflowDongle
   displayName: createflow Dongle
   languages: [de-DE, en-US]
+  # Tiles and logos come from build/appx. Without them electron-builder packs its sample
+  # images, and certification fails on policy 10.1.1.11 (On Device Tiles). The icon brings its
+  # own dark square, so no coloured plate behind it.
+  backgroundColor: transparent
 nsis:
   oneClick: true
   perMachine: false
