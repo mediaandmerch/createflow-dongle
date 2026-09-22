@@ -19,8 +19,10 @@ covered yet.
   Nordic's own nRF52840 Dongle (PCA10059) works too, and so should any nRF52840 stick
   that ships with Nordic's open DFU bootloader.
 - A Naya Create with a spare Bluetooth slot.
-- The flasher app for your OS from [Releases](../../releases), or Node 20+ if you'd rather
-  run it from source.
+- The flasher app. **Windows:** [Get it from Microsoft Store](https://apps.microsoft.com/detail/9P014D85B5KV) —
+  signed by Microsoft, no SmartScreen warning. **macOS/Linux:** the installer for your OS from
+  [Releases](../../releases). An unsigned Windows installer is also on the Releases page, for
+  machines where the Store is locked down. Node 20+ if you'd rather run it from source.
 
 ## Flashing the stick
 
@@ -33,8 +35,9 @@ Updates work the same way. The app sends the running dongle back into the bootlo
 USB (the same 1200-baud trick Arduino boards use), so you never need to touch the reset
 button.
 
-**Windows:** the installer isn't code-signed yet, so SmartScreen will say "Windows
-protected your PC". Click *More info*, then *Run anyway*.
+**Windows:** the Store version is signed by Microsoft, no warning. If you use the unsigned
+installer from Releases instead, SmartScreen will say "Windows protected your PC" — click
+*More info*, then *Run anyway*.
 **Linux:** your user needs permission to open serial ports — usually the `dialout` or
 `uucp` group, depending on your distribution (`sudo usermod -aG dialout $USER`, then log
 out and back in). The app tells you if that's missing. The AppImage needs no
@@ -111,9 +114,9 @@ Release builds are produced by [GitHub Actions](.github/workflows/build.yml) fro
 source in this repository, so every binary can be traced back to a commit.
 
 - **macOS:** signed with a Developer ID certificate and notarized by Apple.
-- **Windows:** free code signing provided by [SignPath.io](https://signpath.io), certificate
-  by [SignPath Foundation](https://signpath.org). *(Application pending — until it is
-  approved, Windows builds are unsigned and SmartScreen will warn once.)*
+- **Windows:** the [Microsoft Store](https://apps.microsoft.com/detail/9P014D85B5KV) build is
+  signed by Microsoft during certification. The unsigned installer on the Releases page is a
+  fallback for machines where the Store is locked down, and SmartScreen will warn once there.
 
 **Code signing policy.** Authors of this project can modify the source code without review.
 Changes contributed by others are reviewed by a maintainer before they are merged. Every
